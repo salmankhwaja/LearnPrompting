@@ -42,40 +42,42 @@
   }
 
   /* ================================================================
-   * COLOUR THEMES (night → day)   Refs #7
+   * COLOUR THEMES   Refs #7
    * ================================================================ */
+  // Same themes and one-tap dots as PSX Dashboard, PK Wealth and CyberWatch
   const THEMES = [
-    { id: "auto", label: "Auto (follows your device)" },
-    { id: "night", label: "Night" },
-    { id: "midnight", label: "Midnight" },
-    { id: "dusk", label: "Dusk" },
-    { id: "dawn", label: "Dawn" },
-    { id: "day", label: "Day" }
+    ["auto", "Auto (follow device)"], ["light", "Light"], ["dark", "Dark"], ["bluegray", "Blue Gray"],
+    ["black", "Black"], ["terminal", "Terminal"], ["red", "Red"],
+    // CyberWatch's four, with its colours
+    ["obsidian", "Obsidian (CyberWatch)"], ["crimson", "Crimson (CyberWatch)"], ["midnight", "Midnight (CyberWatch)"], ["arctic", "Arctic (CyberWatch)"]
   ];
   function applyTheme(id) {
-    const valid = THEMES.some(t => t.id === id) ? id : "auto";
-    document.documentElement.setAttribute("data-theme", valid);
-    try { localStorage.setItem("lp.theme", valid); } catch { /* ignore */ }
-    $("themeSwitcher").querySelectorAll(".theme-dot").forEach(d => {
-      const on = d.dataset.theme === valid;
-      d.classList.toggle("active", on);
-      d.setAttribute("aria-pressed", String(on));
-    });
+    const ok = THEMES.some(t => t[0] === id) ? id : "auto";
+    document.documentElement.setAttribute("data-theme", ok);
+    try { localStorage.setItem("lp.theme", ok); } catch { /* ignore */ }
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", getComputedStyle(document.documentElement).getPropertyValue("--bg").trim());
-  }
-  THEMES.forEach(t => {
-    $("themeSwitcher").append(el("button", { type: "button", class: "theme-dot theme-dot-" + t.id,
-      title: t.label, "aria-label": t.label + " theme", "aria-pressed": "false", "data-theme": t.id,
-      onclick: () => applyTheme(t.id) }));
-  });
-  applyTheme(document.documentElement.getAttribute("data-theme"));
-  // keep the browser bar colour right when the OS switches light/dark in Auto mode
-  try {
-    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
-      if (document.documentElement.getAttribute("data-theme") === "auto") applyTheme("auto");
+    if (meta) meta.setAttribute("content", getComputedStyle(document.documentElement).getPropertyValue("--panel").trim() || "#1d4ed8");
+    $("themeSwitcher").querySelectorAll("[data-t]").forEach(b => {
+      const on = b.dataset.t === ok;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-checked", String(on));
     });
-  } catch { /* older browsers */ }
+  }
+  (function setupThemes() {
+    const row = $("themeSwitcher");
+    THEMES.forEach(([id, label]) => {
+      if (id === "obsidian") row.append(el("span", { class: "sw-sep", "aria-hidden": "true" }));
+      row.append(el("button", { type: "button", class: "sw sw-" + id, role: "radio", "aria-checked": "false",
+        "data-t": id, title: label, "aria-label": label + " theme" }));
+    });
+    row.addEventListener("click", e => { const b = e.target.closest("[data-t]"); if (b) applyTheme(b.dataset.t); });
+    applyTheme(document.documentElement.getAttribute("data-theme") || "auto");
+    try {
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+        if (document.documentElement.getAttribute("data-theme") === "auto") applyTheme("auto");
+      });
+    } catch { /* older browsers */ }
+  })();
 
   /* ---------------- tabs ---------------- */
   function showTab(name) {

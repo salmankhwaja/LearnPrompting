@@ -10,6 +10,10 @@
 2. **Chat**: run the prompt on OpenAI, Claude or Gemini. You control the model, temperature, max output length, Top P and system prompt.
 3. **My library**: save prompts you like, reopen past chats, and export or import everything as JSON.
 
+### Themes
+
+The same one-tap theme dots as PSX Dashboard, PK Wealth and CyberWatch: Auto (follows your device), Light, Dark, Blue Gray, Black, Terminal, Red, and CyberWatch's Obsidian, Crimson, Midnight and Arctic. Your choice is saved in the browser.
+
 ### Frameworks included
 
 | Framework | Sections | Best for |

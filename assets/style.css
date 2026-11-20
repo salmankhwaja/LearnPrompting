@@ -1,64 +1,119 @@
 /* LearnPrompting styles. Refs #1 */
-/* ---------- Themes (night → day). Refs #7 ----------
- * Every colour in this file reads from these variables.
- * Default (no data-theme / "night") is the darkest theme. */
-:root, :root[data-theme="night"] {
+/* ---------- Themes: same set and dot picker as PSX Dashboard, PK Wealth and CyberWatch. Refs #7 ----------
+ * Auto (follows the device), Light, Dark, Blue Gray, Black, Terminal, Red,
+ * then CyberWatch's Obsidian, Crimson, Midnight, Arctic (with its faint grid).
+ * Every colour in this file reads from these variables. */
+:root {
+  color-scheme: light;
+  --bg: #f4f6f5; --panel: #ffffff; --panel2: #eef2f1; --border: #dfe5e3;
+  --text: #14201e; --muted: #5d6b68; --accent: #1d4ed8; --on-accent: #ffffff;
+  --danger: #b91c1c; --ok: #15803d; --warn: #92400e;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* derived, so every theme gets matching tints */
+  --accent-bg: color-mix(in srgb, var(--accent) 16%, var(--panel));
+  --danger-bg: color-mix(in srgb, var(--danger) 14%, var(--panel));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]), :root[data-theme="auto"] {
+    color-scheme: dark;
+    --bg: #0d1413; --panel: #162120; --panel2: #1d2a28; --border: #26332f;
+    --text: #e6eeec; --muted: #93a39f; --accent: #60a5fa; --on-accent: #0b1220;
+    --danger: #f87171; --ok: #4ade80; --warn: #fbbf24;
+  }
+}
+:root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0f1115; --panel: #171a21; --panel2: #1e222b; --border: #2a2f3a;
-  --text: #e6e8ec; --muted: #8b93a3; --accent: #6ea8fe; --accent-bg: #1d2a40; --on-accent: #0b1220;
-  --danger: #ff6b6b; --danger-bg: #3a1a1a; --warn: #f5b84b; --ok: #4cd18a;
+  --bg: #121211; --panel: #1a1a19; --panel2: #242422; --border: #33332f;
+  --text: #f0efec; --muted: #8f8e86; --accent: #3987e5; --on-accent: #0b1220;
+  --danger: #ef7a7a; --ok: #4cc24c; --warn: #f5b84b;
+}
+:root[data-theme="bluegray"] {
+  color-scheme: dark;
+  --bg: #1b2430; --panel: #243041; --panel2: #2b394d; --border: #34445a;
+  --text: #e2e8f0; --muted: #94a3b8; --accent: #60a5fa; --on-accent: #0b1220;
+  --danger: #f87171; --ok: #4ade80; --warn: #fbbf24;
+}
+:root[data-theme="black"] {
+  color-scheme: dark;
+  --bg: #000000; --panel: #0e0e0e; --panel2: #171717; --border: #262626;
+  --text: #f2f2f2; --muted: #9b9b9b; --accent: #f5f5f5; --on-accent: #000000;
+  --danger: #ff5c5c; --ok: #4ade80; --warn: #fbbf24;
+}
+:root[data-theme="terminal"] {
+  color-scheme: dark;
+  --bg: #030803; --panel: #071207; --panel2: #0b1d0b; --border: #144a22;
+  --text: #3dff7a; --muted: #22a64a; --accent: #3dff7a; --on-accent: #021a07;
+  --danger: #ff5f5f; --ok: #3dff7a; --warn: #ffd75f;
+  --font: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+:root[data-theme="red"] {
+  color-scheme: dark;
+  --bg: #1a0c0f; --panel: #271317; --panel2: #31181d; --border: #47222b;
+  --text: #fbe9eb; --muted: #c9a0a6; --accent: #ff6b6b; --on-accent: #2a0507;
+  --danger: #fbbf24; --ok: #4ade80; --warn: #fdba74;
+}
+:root[data-theme="obsidian"] {
+  color-scheme: dark;
+  --bg: #0a0c10; --panel: #111318; --panel2: #181b22; --border: #1e2230;
+  --text: #e8eaf0; --muted: #8a90a4; --accent: #3b82f6; --on-accent: #050a18;
+  --danger: #f87171; --ok: #4ade80; --warn: #fbbf24; --grid: #1e2230; --grid-op: .35;
+}
+:root[data-theme="crimson"] {
+  color-scheme: dark;
+  --bg: #0f0608; --panel: #170a0c; --panel2: #1e0e10; --border: #2a1215;
+  --text: #f0e8e8; --muted: #a48a8a; --accent: #ef4444; --on-accent: #1a0505;
+  --danger: #fbbf24; --ok: #4ade80; --warn: #fdba74; --grid: #2a1215; --grid-op: .35;
 }
 :root[data-theme="midnight"] {
   color-scheme: dark;
-  --bg: #121a2b; --panel: #192338; --panel2: #212d46; --border: #33415e;
-  --text: #e8edf7; --muted: #9ba7be; --accent: #7cb4ff; --accent-bg: #243a5f; --on-accent: #0b1220;
-  --danger: #ff7a7a; --danger-bg: #46202a; --warn: #f7c35f; --ok: #5ad596;
+  --bg: #060810; --panel: #0c1020; --panel2: #101628; --border: #1a2240;
+  --text: #e8f0f4; --muted: #7a9aaa; --accent: #22d3ee; --on-accent: #04141a;
+  --danger: #f87171; --ok: #4ade80; --warn: #fbbf24; --grid: #1a2240; --grid-op: .35;
 }
-:root[data-theme="dusk"] {
-  color-scheme: dark;
-  --bg: #2b2d3a; --panel: #343747; --panel2: #3d4053; --border: #555a72;
-  --text: #f2f2f7; --muted: #b9bbcb; --accent: #a9b6ff; --accent-bg: #474c80; --on-accent: #181a2c;
-  --danger: #ff9494; --danger-bg: #5c3038; --warn: #fbd078; --ok: #82e3ab;
-}
-:root[data-theme="dawn"] {
+:root[data-theme="arctic"] {
   color-scheme: light;
-  --bg: #f4ecdf; --panel: #fbf6ee; --panel2: #efe5d4; --border: #d6c7ae;
-  --text: #2d2416; --muted: #66583f; --accent: #a3470b; --accent-bg: #f5dcc2; --on-accent: #ffffff;
-  --danger: #b42318; --danger-bg: #fbe2df; --warn: #8a5a00; --ok: #1d7239;
+  --bg: #f0f4f8; --panel: #ffffff; --panel2: #f5f7fa; --border: #dde2ec;
+  --text: #1a1f2e; --muted: #4a5270; --accent: #4f46e5; --on-accent: #ffffff;
+  --danger: #dc2626; --ok: #15803d; --warn: #92400e; --grid: #dde2ec; --grid-op: .6;
 }
-:root[data-theme="day"] {
-  color-scheme: light;
-  --bg: #f6f7f9; --panel: #ffffff; --panel2: #f1f3f6; --border: #d5dbe3;
-  --text: #1a1d21; --muted: #56606e; --accent: #2360d6; --accent-bg: #dce8fd; --on-accent: #ffffff;
-  --danger: #c62828; --danger-bg: #fde7e7; --warn: #8a5a00; --ok: #17803d;
+/* CyberWatch's faint grid behind the page, only in its four themes */
+:root[data-theme="obsidian"] body::before, :root[data-theme="crimson"] body::before,
+:root[data-theme="midnight"] body::before, :root[data-theme="arctic"] body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: var(--grid-op, .35);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
-/* Auto: night by default, day when the OS asks for light mode */
-@media (prefers-color-scheme: light) {
-  :root[data-theme="auto"] {
-    color-scheme: light;
-    --bg: #f6f7f9; --panel: #ffffff; --panel2: #f1f3f6; --border: #d5dbe3;
-    --text: #1a1d21; --muted: #56606e; --accent: #2360d6; --accent-bg: #dce8fd; --on-accent: #ffffff;
-    --danger: #c62828; --danger-bg: #fde7e7; --warn: #8a5a00; --ok: #17803d;
-  }
-}
+.topbar, .layout { position: relative; z-index: 1; }
+:root[data-theme="terminal"] .card, :root[data-theme="terminal"] .preview, :root[data-theme="terminal"] .saved,
+:root[data-theme="terminal"] input, :root[data-theme="terminal"] select, :root[data-theme="terminal"] textarea { border-radius: 4px; }
 input[type=range], input[type=checkbox] { accent-color: var(--accent); }
 
-/* theme picker: one click per theme */
-.theme-switcher { display: flex; gap: 6px; align-items: center; }
-.theme-dot { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; padding: 0; cursor: pointer; border: 2px solid var(--border); transition: transform .15s ease; }
-.theme-dot:hover { transform: scale(1.18); }
-.theme-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.theme-dot.active { border-color: var(--text); }
-/* each dot previews its own theme: accent ring on that theme's background (hard-coded on purpose) */
-.theme-dot-auto { background: linear-gradient(135deg, #0f1115 0 50%, #f6f7f9 50% 100%); }
-.theme-dot-night { background: #6ea8fe; box-shadow: inset 0 0 0 5px #0f1115; }
-.theme-dot-midnight { background: #7cb4ff; box-shadow: inset 0 0 0 5px #121a2b; }
-.theme-dot-dusk { background: #a9b6ff; box-shadow: inset 0 0 0 5px #2b2d3a; }
-.theme-dot-dawn { background: #a3470b; box-shadow: inset 0 0 0 5px #f4ecdf; }
-.theme-dot-day { background: #2360d6; box-shadow: inset 0 0 0 5px #ffffff; }
+/* Theme dots: one tap per theme. Each dot is its theme's accent ringed by its background. */
+.swatches { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.sw { width: 19px; height: 19px; padding: 0; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+      transition: all .2s; flex-shrink: 0; outline-offset: 2px; }
+.sw:hover { transform: scale(1.2); }
+.sw.active { border-color: var(--text); }
+.sw:focus-visible { outline: 2px solid var(--accent); }
+.sw-auto { background: radial-gradient(circle, #60a5fa 0 3.5px, transparent 4px), linear-gradient(135deg, #f4f6f5 50%, #0d1413 50%); box-shadow: 0 0 0 1px rgba(128,128,128,.35); }
+.sw-light { background: #1d4ed8; box-shadow: inset 0 0 0 var(--ring, 5px) #ffffff, 0 0 0 1px rgba(128,128,128,.35); }
+.sw-dark { background: #3987e5; box-shadow: inset 0 0 0 var(--ring, 5px) #121211; }
+.sw-bluegray { background: #60a5fa; box-shadow: inset 0 0 0 var(--ring, 5px) #1b2430; }
+.sw-black { background: #f5f5f5; box-shadow: inset 0 0 0 var(--ring, 5px) #000000, 0 0 0 1px rgba(128,128,128,.35); }
+.sw-terminal { background: #3dff7a; box-shadow: inset 0 0 0 var(--ring, 5px) #030803; }
+.sw-red { background: #ff6b6b; box-shadow: inset 0 0 0 var(--ring, 5px) #1a0c0f; }
+.sw-obsidian { background: #3b82f6; box-shadow: inset 0 0 0 var(--ring, 5px) #0a0c10; }
+.sw-crimson { background: #ef4444; box-shadow: inset 0 0 0 var(--ring, 5px) #0f0608; }
+.sw-midnight { background: #22d3ee; box-shadow: inset 0 0 0 var(--ring, 5px) #060810; }
+.sw-arctic { background: #4f46e5; box-shadow: inset 0 0 0 var(--ring, 5px) #f0f4f8, 0 0 0 1px rgba(128,128,128,.35); }
+.sw-sep { width: 1px; height: 16px; background: var(--border); margin: 0 2px; flex: none; }
+@media (max-width: 640px) {
+  .swatches { flex-wrap: nowrap; gap: 4px; order: 3; width: 100%; justify-content: center; }
+  .sw { width: 16px; height: 16px; --ring: 4px; }
+}
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-body { margin: 0; font: 14px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+body { margin: 0; font: 14px/1.55 var(--font); background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
 [hidden] { display: none !important; }
 code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; }
 a { color: var(--accent); }
@@ -201,3 +256,7 @@ button { font: inherit; }
 .lang-ur .card-head .num-badge { margin-right: 0; margin-left: 8px; }
 .lang-ur .key-wrap button { right: auto; left: 6px; }
 .msg[dir="auto"], .saved pre { unicode-bidi: plaintext; text-align: start; }
+@media (max-width: 640px) {
+  .tabs button { white-space: nowrap; padding: 6px 8px; font-size: 13px; }
+  .tabs { overflow-x: auto; }
+}
