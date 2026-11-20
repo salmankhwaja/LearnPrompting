@@ -84,6 +84,7 @@ button { font: inherit; }
 #assembled { height: 46vh; min-height: 260px; margin-top: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
 .preview-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .save-row { display: flex; gap: 8px; margin-top: 10px; }
+.save-row button, .preview-actions button { white-space: nowrap; }
 .note { font-size: 12.5px; margin-top: 8px; color: var(--muted); }
 .note.warn { color: var(--warn); }
 .note.ok { color: var(--ok); }
@@ -133,3 +134,18 @@ button { font: inherit; }
   .chat-list { border-right: 0; border-bottom: 1px solid var(--border); max-height: 160px; }
   .topbar { flex-wrap: wrap; }
 }
+
+/* Urdu (RTL) support. Refs #6 */
+.lang-pick label { margin-top: 0; }
+.lang-pick select { min-width: 150px; }
+:lang(ur), .lang-ur textarea, .lang-ur select, .lang-ur .card, .lang-ur .about, .lang-ur .tip, .lang-ur .note {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Urdu Typesetting", "Noto Naskh Arabic", "Segoe UI", Tahoma, sans-serif;
+}
+.lang-ur .card textarea, .lang-ur #assembled { line-height: 2.1; font-size: 15px; }
+/* monospace fonts break Arabic-script letter joining */
+.lang-ur #assembled { font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Urdu Typesetting", "Noto Naskh Arabic", "Segoe UI", Tahoma, sans-serif; }
+.lang-ur .card li, .lang-ur .about, .lang-ur .tip { line-height: 2; }
+.lang-ur .card details ul { padding-left: 0; padding-right: 20px; }
+.lang-ur .card-head .num-badge { margin-right: 0; margin-left: 8px; }
+.lang-ur .key-wrap button { right: auto; left: 6px; }
+.msg[dir="auto"], .saved pre { unicode-bidi: plaintext; text-align: start; }

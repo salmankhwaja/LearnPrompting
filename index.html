@@ -11,6 +11,7 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/prompts.js" defer></script>
+<script src="assets/prompts.ur.js" defer></script>
 <script src="assets/app.js" defer></script>
 </head>
 <body>
@@ -79,26 +80,33 @@
     <section id="tab-builder" class="tab-panel">
       <div class="builder-head">
         <div class="fw">
-          <label for="framework">Prompt framework</label>
+          <label for="framework" id="fwLabel">Prompt framework</label>
           <select id="framework"></select>
           <p class="about" id="fwAbout"></p>
+        </div>
+        <div class="lang-pick">
+          <label for="lang">Language / زبان</label>
+          <select id="lang">
+            <option value="en">English</option>
+            <option value="ur">اردو (Urdu)</option>
+          </select>
         </div>
         <div class="builder-actions">
           <button type="button" class="ghost" id="fillExample">Fill worked example</button>
           <button type="button" class="ghost" id="resetBuilder">Reset to presets</button>
         </div>
       </div>
-      <p class="tip">Choose a preset in each box, then <strong>rewrite it for your situation</strong>. Replace every <code>[placeholder]</code>. Open "Think it through" for the questions a good prompt answers.</p>
+      <p class="tip" id="builderTip">Choose a preset in each box, then rewrite it for your situation. Replace every [placeholder]. Open "Think it through" for the questions a good prompt answers.</p>
 
       <div class="builder-grid">
         <div id="sections"></div>
 
         <div class="preview">
           <div class="preview-head">
-            <h3>Your prompt</h3>
-            <label class="check"><input type="checkbox" id="useHeadings" checked> Section headings</label>
+            <h3 id="yourPrompt">Your prompt</h3>
+            <label class="check"><input type="checkbox" id="useHeadings" checked> <span id="headingsLabel">Section headings</span></label>
           </div>
-          <textarea id="assembled" readonly></textarea>
+          <textarea id="assembled" readonly dir="auto"></textarea>
           <div id="placeholderNote" class="note"></div>
           <div class="stats" id="promptStats"></div>
           <div class="preview-actions">
@@ -125,7 +133,7 @@
         <div class="chat-main">
           <div id="messages"></div>
           <form id="composer">
-            <textarea id="prompt" placeholder="Type a message… (Enter to send, Shift+Enter for a new line)"></textarea>
+            <textarea id="prompt" dir="auto" placeholder="Type a message… (Enter to send, Shift+Enter for a new line)"></textarea>
             <button class="primary" id="send" type="submit">Send</button>
           </form>
         </div>

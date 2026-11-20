@@ -106,47 +106,122 @@
   $("apiKey").addEventListener("change", syncKey);
 
   /* ================================================================
-   * PROMPT BUILDER
+   * PROMPT BUILDER (English + Urdu)   Refs #1, #6
    * ================================================================ */
-  // builder.sections[key] = { preset: index | -1 (custom), text, on }
-  const builder = Object.assign({ framework: "ropcf", years: 10, headings: true, sections: {} }, store.get(K.builder, {}));
+  const UR = window.PROMPT_DATA_UR;
+  const UI_EN = {
+    frameworkLabel: "Prompt framework",
+    fillExample: "Fill worked example",
+    reset: "Reset to presets",
+    tip: "Choose a preset in each box, then rewrite it for your situation. Replace every [placeholder]. Open \"Think it through\" for the questions a good prompt answers.",
+    yourPrompt: "Your prompt",
+    headings: "Section headings",
+    runNow: "Run now ▶",
+    toChat: "Edit in chat",
+    copy: "Copy",
+    saveName: "Name this prompt to save it…",
+    save: "Save",
+    think: "Think it through",
+    writeOwn: "✏️ Write my own",
+    include: "Include",
+    years: "Years:",
+    placeholdersLeft: (n, list) => "⚠ " + n + " placeholder" + (n > 1 ? "s" : "") + " still to fill: " + list,
+    ready: "✓ No placeholders left. Ready to run.",
+    stats: (w, t) => w + " words · ~" + t + " tokens",
+    replaced: "Previous text replaced.",
+    undo: "Undo",
+    exampleLoaded: "Worked example loaded: a security code review. Read each box to see how the parts fit together.",
+    resetDone: "Boxes reset to their default presets.",
+    copied: "Copied to clipboard.",
+    copyBlocked: "Copy blocked by the browser. The text is selected: press Ctrl+C.",
+    empty: "The prompt is empty.",
+    nothingToSave: "Nothing to save yet.",
+    needName: "Give the prompt a name first.",
+    saved: "Saved to My library.",
+    saveFailed: "Could not save: browser storage is full or blocked."
+  };
+
+  // builder.sections[lang][key] = { preset: index | -1 (custom), text, on }
+  const builder = Object.assign({ framework: "ropcf", years: 10, headings: true, lang: "en", sections: {} }, store.get(K.builder, {}));
+  if (!builder.sections.en && !builder.sections.ur) builder.sections = { en: builder.sections }; // migrate v1 (English only)
+  builder.sections.en = builder.sections.en || {};
+  builder.sections.ur = builder.sections.ur || {};
   const saveBuilder = () => store.set(K.builder, builder);
 
+  const isUr = () => builder.lang === "ur";
+  const SEC = () => (isUr() ? UR.SECTIONS : SECTIONS);
+  const T = () => (isUr() ? UR.UI : UI_EN);
+  const EXAMPLE = () => (isUr() ? UR.WORKED_EXAMPLE : WORKED_EXAMPLE);
+  const states = () => builder.sections[builder.lang];
   const fillYears = (text) => text.replace(/\{years\}/g, String(builder.years || "[x]"));
-
-  function sectionState(key, def) {
-    if (!builder.sections[key]) {
-      const pi = def && Number.isInteger(def.preset) ? def.preset : 0;
-      builder.sections[key] = { preset: pi, text: fillYears(SECTIONS[key].presets[pi].text), on: !(def && def.optional) };
-    }
-    return builder.sections[key];
-  }
+  const yearsPattern = () => (isUr() ? UR.yearsPattern : /(\d+|\[x\]) years of/);
+  const yearsReplace = (y) => (isUr() ? UR.yearsReplace(y) : y + " years of");
 
   function currentFramework() { return FRAMEWORKS.find(f => f.id === builder.framework) || FRAMEWORKS[0]; }
+  const fwName = (fw) => (isUr() ? UR.FRAMEWORK_TEXT[fw.id].name : fw.name);
+  const fwAbout = (fw) => (isUr() ? UR.FRAMEWORK_TEXT[fw.id].about : fw.about);
+  function secLabel(fw, def) {
+    if (isUr()) { const o = UR.FRAMEWORK_TEXT[fw.id].labels; return (o && o[def.key]) || UR.SECTIONS[def.key].label; }
+    return def.label || SECTIONS[def.key].label;
+  }
+
+  function sectionState(key, def) {
+    const all = states();
+    if (!all[key]) {
+      const pi = def && Number.isInteger(def.preset) ? def.preset : 0;
+      all[key] = { preset: pi, text: fillYears(SEC()[key].presets[pi].text), on: !(def && def.optional) };
+    }
+    return all[key];
+  }
+
+  function applyBuilderLanguage() {
+    const t = T();
+    const panel = $("tab-builder");
+    panel.dir = isUr() ? "rtl" : "ltr";
+    panel.lang = isUr() ? "ur" : "en";
+    panel.classList.toggle("lang-ur", isUr());
+    $("fwLabel").textContent = t.frameworkLabel;
+    $("fillExample").textContent = t.fillExample;
+    $("resetBuilder").textContent = t.reset;
+    $("builderTip").textContent = t.tip;
+    $("yourPrompt").textContent = t.yourPrompt;
+    $("headingsLabel").textContent = t.headings;
+    $("runNow").textContent = t.runNow;
+    $("toChat").textContent = t.toChat;
+    $("copyPrompt").textContent = t.copy;
+    $("saveName").placeholder = t.saveName;
+    $("savePrompt").textContent = t.save;
+    $("lang").value = builder.lang;
+  }
 
   function renderFrameworkSelect() {
     const sel = $("framework");
-    sel.replaceChildren(...FRAMEWORKS.map(f => el("option", { value: f.id, text: f.name })));
+    sel.replaceChildren(...FRAMEWORKS.map(f => el("option", { value: f.id, text: fwName(f) })));
     sel.value = builder.framework;
-    sel.addEventListener("change", () => { builder.framework = sel.value; saveBuilder(); renderSections(); });
   }
+  $("framework").addEventListener("change", () => { builder.framework = $("framework").value; saveBuilder(); renderSections(); });
+  $("lang").addEventListener("change", () => {
+    builder.lang = $("lang").value === "ur" ? "ur" : "en";
+    saveBuilder(); applyBuilderLanguage(); renderFrameworkSelect(); renderSections();
+  });
 
   function renderSections() {
     const fw = currentFramework();
-    $("fwAbout").textContent = fw.about;
+    const t = T();
+    $("fwAbout").textContent = fwAbout(fw);
     const wrap = $("sections"); wrap.replaceChildren();
     fw.sections.forEach((def, i) => {
-      const s = SECTIONS[def.key];
+      const s = SEC()[def.key];
       const st = sectionState(def.key, def);
-      const label = def.label || s.label;
+      const label = secLabel(fw, def);
 
-      const ta = el("textarea", { rows: 7, spellcheck: "true", "aria-label": label });
+      const ta = el("textarea", { rows: 7, spellcheck: "true", "aria-label": label, dir: "auto" });
       ta.value = st.text;
-      ta.addEventListener("input", () => { st.text = ta.value; if (st.preset >= 0) st.edited = true; saveBuilder(); assemble(); });
+      ta.addEventListener("input", () => { st.text = ta.value; saveBuilder(); assemble(); });
 
-      const sel = el("select", { "aria-label": label + " preset" });
+      const sel = el("select", { "aria-label": label });
       s.presets.forEach((p, idx) => sel.append(el("option", { value: idx, text: p.name })));
-      sel.append(el("option", { value: -1, text: "✏️ Write my own" }));
+      sel.append(el("option", { value: -1, text: t.writeOwn }));
       sel.value = st.preset;
 
       const undoBox = el("div", { class: "undo", hidden: true });
@@ -154,12 +229,11 @@
         const prev = st.text, prevPreset = st.preset;
         st.preset = +sel.value;
         st.text = st.preset >= 0 ? fillYears(s.presets[st.preset].text) : "";
-        st.edited = false;
         ta.value = st.text; saveBuilder(); assemble();
         if (prev.trim() && prev !== st.text) {
-          const btn = el("button", { type: "button", text: "Undo",
+          const btn = el("button", { type: "button", text: t.undo,
             onclick: () => { st.text = prev; st.preset = prevPreset; ta.value = prev; sel.value = prevPreset; undoBox.hidden = true; saveBuilder(); assemble(); } });
-          undoBox.replaceChildren(document.createTextNode("Previous text replaced."), btn);
+          undoBox.replaceChildren(document.createTextNode(t.replaced + " "), btn);
           undoBox.hidden = false;
           clearTimeout(undoBox._t); undoBox._t = setTimeout(() => { undoBox.hidden = true; }, 10000);
         }
@@ -167,21 +241,20 @@
       });
 
       const controls = el("div", { class: "card-controls" }, sel);
-      if (s.usesYears) {
-        const yrs = el("input", { type: "number", min: 0, max: 60, value: builder.years, "aria-label": "Years of experience" });
+      if (def.key === "persona") {
+        const yrs = el("input", { type: "number", min: 0, max: 60, value: builder.years, "aria-label": t.years });
         yrs.addEventListener("input", () => {
           builder.years = yrs.value;
-          // update the first "<n> years of" in the persona text
-          st.text = st.text.replace(/(\d+|\[x\]) years of/, (builder.years || "[x]") + " years of");
+          st.text = st.text.replace(yearsPattern(), yearsReplace(builder.years || "[x]"));
           ta.value = st.text; saveBuilder(); assemble();
         });
-        controls.append(el("span", { class: "years" }, document.createTextNode("Years:"), yrs));
+        controls.append(el("span", { class: "years" }, document.createTextNode(t.years), yrs));
       } else {
         controls.append(el("span"));
       }
 
       const guide = el("details", null,
-        el("summary", { text: "Think it through" }),
+        el("summary", { text: t.think }),
         el("ul", null, ...s.guide.map(q => el("li", { text: q }))));
 
       const head = el("div", { class: "card-head" },
@@ -191,7 +264,7 @@
       if (def.optional) {
         const cb = el("input", { type: "checkbox" }); cb.checked = st.on;
         cb.addEventListener("change", () => { st.on = cb.checked; card.classList.toggle("off", !st.on); saveBuilder(); assemble(); });
-        head.append(el("label", { class: "check" }, cb, document.createTextNode("Include")));
+        head.append(el("label", { class: "check" }, cb, document.createTextNode(t.include)));
       } else {
         st.on = true;
       }
@@ -204,30 +277,30 @@
 
   function assemble() {
     const fw = currentFramework();
+    const t = T();
     const parts = [];
     fw.sections.forEach(def => {
-      const st = builder.sections[def.key];
+      const st = states()[def.key];
       if (!st || !st.on || !st.text.trim()) return;
-      const label = def.label || SECTIONS[def.key].label;
-      parts.push(builder.headings ? "## " + label + "\n" + st.text.trim() : st.text.trim());
+      parts.push(builder.headings ? "## " + secLabel(fw, def) + "\n" + st.text.trim() : st.text.trim());
     });
     const text = parts.join("\n\n");
     $("assembled").value = text;
 
-    // ignore markdown checkbox "[ ]" and JSON-ish brackets inside code fences
+    // ignore code fences and Markdown checkboxes "[ ]"
     const scan = text.replace(/```[\s\S]*?```/g, "");
-    const left = (scan.match(PLACEHOLDER_RE) || []).filter(p => p.trim() !== "[ ]" && p !== "[ ]");
-    const uniq = [...new Set(left)];
+    const uniq = [...new Set((scan.match(PLACEHOLDER_RE) || []).filter(p => p.trim() !== "[ ]" && p !== "[ ]"))];
     const note = $("placeholderNote");
     if (uniq.length) {
       note.className = "note warn";
-      note.textContent = "⚠ " + uniq.length + " placeholder" + (uniq.length > 1 ? "s" : "") + " still to fill: " +
-        uniq.slice(0, 8).join(", ") + (uniq.length > 8 ? " …" : "");
+      note.textContent = t.placeholdersLeft(uniq.length, uniq.slice(0, 8).join(isUr() ? "، " : ", ") + (uniq.length > 8 ? " …" : ""));
     } else if (text) {
-      note.className = "note ok"; note.textContent = "✓ No placeholders left. Ready to run.";
+      note.className = "note ok"; note.textContent = t.ready;
     } else { note.textContent = ""; }
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-    $("promptStats").textContent = words + " words · ~" + Math.ceil(text.length / 4) + " tokens";
+    // Urdu script typically costs ~2–3x more tokens per character than English
+    const tokens = Math.ceil(text.length / (isUr() ? 1.6 : 4));
+    $("promptStats").textContent = t.stats(words, tokens);
     return text;
   }
 
@@ -237,39 +310,40 @@
   $("fillExample").addEventListener("click", () => {
     currentFramework().sections.forEach(def => {
       const st = sectionState(def.key, def);
-      if (WORKED_EXAMPLE[def.key]) { st.text = WORKED_EXAMPLE[def.key]; st.preset = -1; st.on = true; }
+      const ex = EXAMPLE()[def.key];
+      if (ex) { st.text = ex; st.preset = -1; st.on = true; }
     });
     saveBuilder(); renderSections();
-    flash($("builderMsg"), "Worked example loaded: a security code review. Read each box to see how the parts fit together.", "ok");
+    flash($("builderMsg"), T().exampleLoaded, "ok");
   });
   $("resetBuilder").addEventListener("click", () => {
-    currentFramework().sections.forEach(def => { delete builder.sections[def.key]; });
+    currentFramework().sections.forEach(def => { delete states()[def.key]; });
     saveBuilder(); renderSections();
-    flash($("builderMsg"), "Boxes reset to their default presets.", "ok");
+    flash($("builderMsg"), T().resetDone, "ok");
   });
 
   $("copyPrompt").addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(assemble()); flash($("builderMsg"), "Copied to clipboard.", "ok"); }
-    catch { $("assembled").select(); flash($("builderMsg"), "Copy blocked by the browser. The text is selected: press Ctrl+C.", "warn"); }
+    try { await navigator.clipboard.writeText(assemble()); flash($("builderMsg"), T().copied, "ok"); }
+    catch { $("assembled").select(); flash($("builderMsg"), T().copyBlocked, "warn"); }
   });
   $("toChat").addEventListener("click", () => {
     $("prompt").value = assemble(); showTab("chat"); $("prompt").focus();
   });
   $("runNow").addEventListener("click", () => {
     const text = assemble();
-    if (!text.trim()) { flash($("builderMsg"), "The prompt is empty.", "warn"); return; }
+    if (!text.trim()) { flash($("builderMsg"), T().empty, "warn"); return; }
     showTab("chat");
     sendMessage(text);
   });
   $("savePrompt").addEventListener("click", () => {
     const text = assemble();
     const name = $("saveName").value.trim();
-    if (!text.trim()) { flash($("builderMsg"), "Nothing to save yet.", "warn"); return; }
-    if (!name) { flash($("builderMsg"), "Give the prompt a name first.", "warn"); $("saveName").focus(); return; }
+    if (!text.trim()) { flash($("builderMsg"), T().nothingToSave, "warn"); return; }
+    if (!name) { flash($("builderMsg"), T().needName, "warn"); $("saveName").focus(); return; }
     const prompts = store.get(K.prompts, []);
-    prompts.unshift({ id: uid(), name, framework: currentFramework().name, text, created: new Date().toISOString() });
-    if (store.set(K.prompts, prompts)) { $("saveName").value = ""; flash($("builderMsg"), "Saved to My library.", "ok"); }
-    else flash($("builderMsg"), "Could not save: browser storage is full or blocked.", "err");
+    prompts.unshift({ id: uid(), name, framework: fwName(currentFramework()), lang: builder.lang, text, created: new Date().toISOString() });
+    if (store.set(K.prompts, prompts)) { $("saveName").value = ""; flash($("builderMsg"), T().saved, "ok"); }
+    else flash($("builderMsg"), T().saveFailed, "err");
   });
 
   /* ================================================================
@@ -365,7 +439,7 @@
   }
 
   function msgNode(m) {
-    const div = el("div", { class: "msg " + m.role, text: m.content });
+    const div = el("div", { class: "msg " + m.role, text: m.content, dir: "auto" });
     if (m.meta || m.role === "assistant") {
       const meta = el("div", { class: "meta" }, el("span", { text: m.meta || "" }));
       if (m.role === "assistant") {
@@ -481,9 +555,9 @@
           store.set(K.prompts, store.get(K.prompts, []).filter(x => x.id !== p.id)); renderLibrary();
         } }));
       list.append(el("div", { class: "saved" },
-        el("h3", { text: p.name }),
+        el("h3", { text: p.name, dir: "auto" }),
         el("div", { class: "sub", text: (p.framework || "") + " · " + new Date(p.created).toLocaleString() }),
-        el("pre", { text: p.text }),
+        el("pre", { text: p.text, dir: "auto" }),
         actions));
     });
   }
@@ -540,6 +614,7 @@
 
   /* ---------------- init ---------------- */
   selectProvider(settings.provider);
+  applyBuilderLanguage();
   renderFrameworkSelect();
   renderSections();
   renderChatList();
