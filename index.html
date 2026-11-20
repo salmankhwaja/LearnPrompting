@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Strict CSP: only this site's own files; network calls only to the three LLM providers. Refs #1 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com; base-uri 'none'; form-action 'none'; object-src 'none'; manifest-src 'self'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Learn prompt engineering: build structured prompts and test them on OpenAI, Claude and Gemini with your own API key.">
+<title>LearnPrompting — Prompt Builder & LLM Playground</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/prompts.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🧠 LearnPrompting</div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="builder" class="active">1 · Build prompt</button>
+    <button role="tab" data-tab="chat">2 · Chat</button>
+    <button role="tab" data-tab="library">3 · My library</button>
+  </nav>
+  <a class="repo" href="https://github.com/salmankhwaja/LearnPrompting" rel="noopener">GitHub</a>
+</header>
+
+<div class="layout">
+  <!-- ============ SETTINGS SIDEBAR ============ -->
+  <aside class="settings">
+    <h2>Model settings</h2>
+
+    <label>Provider</label>
+    <div class="providers" id="providers">
+      <button type="button" data-p="openai">OpenAI</button>
+      <button type="button" data-p="anthropic">Claude</button>
+      <button type="button" data-p="gemini">Gemini</button>
+    </div>
+
+    <label for="model">Model</label>
+    <input id="model" list="modelList" autocomplete="off" spellcheck="false">
+    <datalist id="modelList"></datalist>
+    <div class="hint">Pick a suggestion or type any model ID.</div>
+
+    <label for="apiKey">API key</label>
+    <div class="key-wrap">
+      <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your key…">
+      <button type="button" id="toggleKey">show</button>
+    </div>
+    <label class="check"><input type="checkbox" id="rememberKey"> Remember key in this browser</label>
+    <div class="hint">Your key goes only to the provider you pick, straight from this browser. Use a key with a spending limit. Leave "remember" off on shared machines.</div>
+
+    <label for="temp">Temperature <span class="info" id="tempInfo"></span></label>
+    <div class="row">
+      <input type="range" id="temp" min="0" max="2" step="0.05" value="0.7">
+      <input type="number" class="num" id="tempNum" min="0" max="2" step="0.05" value="0.7">
+    </div>
+    <div class="hint">Low (0–0.3): focused, repeatable. High (0.8+): creative, varied.</div>
+
+    <label for="maxTok">Max length (output tokens)</label>
+    <div class="row">
+      <input type="range" id="maxTok" min="64" max="8192" step="64" value="1024">
+      <input type="number" class="num" id="maxTokNum" min="1" max="65536" value="1024">
+    </div>
+    <div class="hint">Roughly ¾ of a word per token. 1024 ≈ 750 words.</div>
+
+    <label for="topP">Top P</label>
+    <div class="row">
+      <input type="range" id="topP" min="0" max="1" step="0.01" value="1">
+      <input type="number" class="num" id="topPNum" min="0" max="1" step="0.01" value="1">
+    </div>
+    <label class="check"><input type="checkbox" id="sendTopP"> Send Top P (some models reject it with temperature)</label>
+
+    <label for="system">System prompt</label>
+    <textarea id="system" rows="4" placeholder="Optional. Standing instructions for the whole chat, e.g. a persona."></textarea>
+  </aside>
+
+  <main>
+    <!-- ============ BUILDER ============ -->
+    <section id="tab-builder" class="tab-panel">
+      <div class="builder-head">
+        <div class="fw">
+          <label for="framework">Prompt framework</label>
+          <select id="framework"></select>
+          <p class="about" id="fwAbout"></p>
+        </div>
+        <div class="builder-actions">
+          <button type="button" class="ghost" id="fillExample">Fill worked example</button>
+          <button type="button" class="ghost" id="resetBuilder">Reset to presets</button>
+        </div>
+      </div>
+      <p class="tip">Choose a preset in each box, then <strong>rewrite it for your situation</strong>. Replace every <code>[placeholder]</code>. Open "Think it through" for the questions a good prompt answers.</p>
+
+      <div class="builder-grid">
+        <div id="sections"></div>
+
+        <div class="preview">
+          <div class="preview-head">
+            <h3>Your prompt</h3>
+            <label class="check"><input type="checkbox" id="useHeadings" checked> Section headings</label>
+          </div>
+          <textarea id="assembled" readonly></textarea>
+          <div id="placeholderNote" class="note"></div>
+          <div class="stats" id="promptStats"></div>
+          <div class="preview-actions">
+            <button type="button" class="primary" id="runNow">Run now ▶</button>
+            <button type="button" class="ghost" id="toChat">Edit in chat</button>
+            <button type="button" class="ghost" id="copyPrompt">Copy</button>
+          </div>
+          <div class="save-row">
+            <input id="saveName" placeholder="Name this prompt to save it…" maxlength="120">
+            <button type="button" class="ghost" id="savePrompt">Save</button>
+          </div>
+          <div id="builderMsg" class="note"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CHAT ============ -->
+    <section id="tab-chat" class="tab-panel" hidden>
+      <div class="chat-layout">
+        <div class="chat-list">
+          <button type="button" class="primary full" id="newChat">+ New chat</button>
+          <ul id="chatList"></ul>
+        </div>
+        <div class="chat-main">
+          <div id="messages"></div>
+          <form id="composer">
+            <textarea id="prompt" placeholder="Type a message… (Enter to send, Shift+Enter for a new line)"></textarea>
+            <button class="primary" id="send" type="submit">Send</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ LIBRARY ============ -->
+    <section id="tab-library" class="tab-panel" hidden>
+      <h2>My saved prompts</h2>
+      <p class="tip">Saved prompts and chats live only in this browser. Export them to keep a backup or move them to another device. API keys are never exported.</p>
+      <div class="lib-actions">
+        <button type="button" class="ghost" id="exportData">Export all (JSON)</button>
+        <label class="ghost file-btn">Import JSON<input type="file" id="importData" accept="application/json,.json" hidden></label>
+        <button type="button" class="danger" id="clearData">Delete all saved data</button>
+      </div>
+      <div id="libMsg" class="note"></div>
+      <div id="savedList"></div>
+    </section>
+  </main>
+</div>
+</body>
+</html>
