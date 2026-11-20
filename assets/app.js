@@ -41,6 +41,42 @@
     clearTimeout(node._t); node._t = setTimeout(() => { node.textContent = ""; }, 4000);
   }
 
+  /* ================================================================
+   * COLOUR THEMES (night → day)   Refs #7
+   * ================================================================ */
+  const THEMES = [
+    { id: "auto", label: "Auto (follows your device)" },
+    { id: "night", label: "Night" },
+    { id: "midnight", label: "Midnight" },
+    { id: "dusk", label: "Dusk" },
+    { id: "dawn", label: "Dawn" },
+    { id: "day", label: "Day" }
+  ];
+  function applyTheme(id) {
+    const valid = THEMES.some(t => t.id === id) ? id : "auto";
+    document.documentElement.setAttribute("data-theme", valid);
+    try { localStorage.setItem("lp.theme", valid); } catch { /* ignore */ }
+    $("themeSwitcher").querySelectorAll(".theme-dot").forEach(d => {
+      const on = d.dataset.theme === valid;
+      d.classList.toggle("active", on);
+      d.setAttribute("aria-pressed", String(on));
+    });
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", getComputedStyle(document.documentElement).getPropertyValue("--bg").trim());
+  }
+  THEMES.forEach(t => {
+    $("themeSwitcher").append(el("button", { type: "button", class: "theme-dot theme-dot-" + t.id,
+      title: t.label, "aria-label": t.label + " theme", "aria-pressed": "false", "data-theme": t.id,
+      onclick: () => applyTheme(t.id) }));
+  });
+  applyTheme(document.documentElement.getAttribute("data-theme"));
+  // keep the browser bar colour right when the OS switches light/dark in Auto mode
+  try {
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
+      if (document.documentElement.getAttribute("data-theme") === "auto") applyTheme("auto");
+    });
+  } catch { /* older browsers */ }
+
   /* ---------------- tabs ---------------- */
   function showTab(name) {
     document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
