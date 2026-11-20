@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="auto">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +9,8 @@
 <meta name="description" content="Learn prompt engineering: build structured prompts and test them on OpenAI, Claude and Gemini with your own API key.">
 <title>LearnPrompting — Prompt Builder & LLM Playground</title>
 <link rel="icon" href="data:,">
+<meta name="theme-color" content="#0f1115">
+<script src="assets/theme-init.js"></script>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/prompts.js" defer></script>
 <script src="assets/prompts.ur.js" defer></script>
@@ -22,6 +24,7 @@
     <button role="tab" data-tab="chat">2 · Chat</button>
     <button role="tab" data-tab="library">3 · My library</button>
   </nav>
+  <div class="theme-switcher" id="themeSwitcher" role="group" aria-label="Colour theme"></div>
   <a class="repo" href="https://github.com/salmankhwaja/LearnPrompting" rel="noopener">GitHub</a>
 </header>
 
