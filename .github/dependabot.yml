@@ -1,0 +1,11 @@
+# Dependabot version updates. Refs #2
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "security"]
+    groups:
+      actions:
+        patterns: ["*"]
