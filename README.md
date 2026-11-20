@@ -24,6 +24,10 @@
 | Critique & refine | Persona, Problem, Objective, Critique, Format | Higher-quality drafts |
 | Socratic tutor | Teacher persona, Teach & test, Learning gap, Socratic reasoning, Constraints | Learning a topic yourself |
 
+### English and اردو (Urdu)
+
+Switch the builder to **اردو** to get every preset, section name, guiding question and the worked example in Urdu script, laid out right to left. Technical terms (OWASP, PCI DSS, JSON, API) stay in English. English and Urdu drafts are kept separately. Urdu prompts use roughly 2–3× more tokens than the same prompt in English, so they cost more per request.
+
 The page warns you about any `[placeholder]` you have not filled in yet. "Fill worked example" loads a complete security code review prompt so learners can see a finished prompt.
 
 ## Privacy and security
@@ -51,6 +55,7 @@ Serve it over HTTP rather than opening `index.html` from disk; the Content-Secur
 ```
 index.html          page shell and CSP
 assets/prompts.js   frameworks, sections, presets, worked example (edit this to add prompts)
+assets/prompts.ur.js  Urdu versions of the same presets (same order as prompts.js)
 assets/app.js       builder, provider API calls, chat history, library
 assets/style.css    styles
 ```
